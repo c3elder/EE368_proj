@@ -12,14 +12,14 @@ img_ds = imresize(rawImage,downsize);
 
 % figure(1);imshow(img)
 % clear img
-% figure(2);
-% subplot(2,2,1);imshow(img_ds)
+figure(2);
+subplot(2,2,1);imshow(img_ds)
 
 % Convert to HSV
 img_ds_hsv = rgb2hsv(img_ds);
-% subplot(2,2,2);imshow(img_ds_hsv(:,:,1))
-% subplot(2,2,3);imshow(img_ds_hsv(:,:,2))
-% subplot(2,2,4);imshow(img_ds_hsv(:,:,3))
+subplot(2,2,2);imshow(img_ds_hsv(:,:,1))
+subplot(2,2,3);imshow(img_ds_hsv(:,:,2))
+subplot(2,2,4);imshow(img_ds_hsv(:,:,3))
 
 % Threshold
 thresh_global = graythresh(img_ds);
@@ -33,11 +33,11 @@ img_h_bw = im2bw(img_ds_hsv(:,:,1),thresh_h);
 img_s_bw = im2bw(img_ds_hsv(:,:,2),thresh_s);
 img_v_bw = im2bw(img_ds_hsv(:,:,3),thresh_v);
 
-% figure(3);
-% subplot(2,2,1);imshow(img_ds_bw)
-% subplot(2,2,2);imshow(img_h_bw)
-% subplot(2,2,3);imshow(img_s_bw)
-% subplot(2,2,4);imshow(img_v_bw)
+figure(3);
+subplot(2,2,1);imshow(img_ds_bw)
+subplot(2,2,2);imshow(img_h_bw)
+subplot(2,2,3);imshow(img_s_bw)
+subplot(2,2,4);imshow(img_v_bw)
 
 % Apply LoG Operator
 img_ds_log = edge(img_ds_bw,'log');
@@ -45,11 +45,11 @@ img_h_log = edge(img_h_bw,'log');
 img_s_log = edge(img_s_bw,'log');
 img_v_log = edge(img_v_bw,'log');
 
-% figure(4);
-% subplot(2,2,1);imshow(img_ds_log)
-% subplot(2,2,2);imshow(img_h_log)
-% subplot(2,2,3);imshow(img_s_log)
-% subplot(2,2,4);imshow(img_v_log)
+figure(4);
+subplot(2,2,1);imshow(img_ds_log)
+subplot(2,2,2);imshow(img_h_log)
+subplot(2,2,3);imshow(img_s_log)
+subplot(2,2,4);imshow(img_v_log)
 
 % Dilate
 box = ones(7,7);
@@ -58,11 +58,11 @@ img_h_dil = imdilate(img_h_log,box);
 img_s_dil = imdilate(img_s_log,box);
 img_v_dil = imdilate(img_v_log,box);
 
-% figure(5);
-% subplot(2,2,1);imshow(img_ds_dil)
-% subplot(2,2,2);imshow(img_h_dil)
-% subplot(2,2,3);imshow(img_s_dil)
-% subplot(2,2,4);imshow(img_v_dil)
+figure(5);
+subplot(2,2,1);imshow(img_ds_dil)
+subplot(2,2,2);imshow(img_h_dil)
+subplot(2,2,3);imshow(img_s_dil)
+subplot(2,2,4);imshow(img_v_dil)
 
 % Fill Holes
 img_ds_fill = imfill(img_ds_dil,'holes');
@@ -70,11 +70,11 @@ img_h_fill = imfill(img_h_dil,'holes');
 img_s_fill = imfill(img_s_dil,'holes');
 img_v_fill = imfill(img_v_dil,'holes');
 
-% figure(6)
-% subplot(2,2,1);imshow(img_ds_fill)
-% subplot(2,2,2);imshow(img_h_fill)
-% subplot(2,2,3);imshow(img_s_fill)
-% subplot(2,2,4);imshow(img_v_fill)
+figure(6)
+subplot(2,2,1);imshow(img_ds_fill)
+subplot(2,2,2);imshow(img_h_fill)
+subplot(2,2,3);imshow(img_s_fill)
+subplot(2,2,4);imshow(img_v_fill)
 
 % Label Regions
 img_v_label = bwlabel(img_v_fill,8);
@@ -126,14 +126,14 @@ for nRegion = 1:length(imgProps)
     end
 end % nRegion
 
-% figure(7); imshow(img_v_final)
-% figure(8); imshow(rgb2gray(img_ds).*img_v_final)
-% figure(9); imshow(img_h_final)
-% figure(10);imshow(rgb2gray(img_ds).*img_h_final)
+figure(7); imshow(img_v_final)
+figure(8); imshow(rgb2gray(img_ds).*img_v_final)
+figure(9); imshow(img_h_final)
+figure(10);imshow(rgb2gray(img_ds).*img_h_final)
 
 % Combine Filters
 img_hv_all = ((img_h_final + img_v_final) > 0);
-% figure(11);imshow(img_hv_all)
+figure(11);imshow(img_hv_all)
 
 % Separate the Bills
 img_hv_label = bwlabel(img_hv_all,8);
@@ -158,7 +158,7 @@ fprintf('End Segmentation, Start SIFTing...\n')
 % **********************START SIFTING**************************************
 % sample = rgb2gray(rawImage);
 sample  = rgb2gray(rawImage.* ...
-          repmat(imresize(img_hv_final(:,:,2),1/downsize,'nearest'),[1,1,3]));
+          repmat(imresize(img_hv_final(:,:,1),1/downsize,'nearest'),[1,1,3]));
 figure(1);imshow(sample)
 clearvars -except sample
 
