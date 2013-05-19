@@ -1,0 +1,13 @@
+Folder, Sample Image Location, Expected Match Country 1, Country 2, Country 3, Location 1, Location 2, Location 3
+US, five_back.jpg, US, , , five_back.jpg, , 
+US, five_front.jpg, US, , , five_front.jpg, , 
+US, one_back.jpg, US, , , one_back.jpg, , 
+US, one_front.jpg, US, , , one_front.jpg, , 
+India, ten_back.jpg, India, , , ten_back.jpg, , 
+India, ten_front.jpg, India, , , ten_front.jpg, ,
+India, twenty_back.jpg, India, , , twenty_back.jpg, , 
+India, twenty_front.jpg, India, , , twenty_front.jpg, , 
+Eritrea, one_back.jpg, Eritrea, , , one_back.jpg, , 
+Eritrea, one_front.jpg, Eritrea, , , one_front.jpg, , 
+EU, ten_back_italy.jpg, EU, , , ten_back_italy.jpg, , 
+EU, ten_front.jpg, EU, , , ten_front.jpg, , 

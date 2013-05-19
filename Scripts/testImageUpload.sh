@@ -1,0 +1,1 @@
+curl -F "uploadedfile=@lena.jpg"  http://128.12.178.37/computeSIFT.php
