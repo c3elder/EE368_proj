@@ -12,7 +12,7 @@ fclose(fid);
 results = zeros(rows-1, 3);
 
 %test every image against the expected results
-algorithmHandle = @matchImages;
+algorithmHandle = @matchImagesNoSeg;
 
 outputStructArray = {};
 
