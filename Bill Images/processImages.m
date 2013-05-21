@@ -27,7 +27,6 @@ for i=1:rows-1
     [f, d] = vl_sift(single(rgb2gray(imread([country, folderSlash, location]))), 'PeakThresh', thresh);
     kdTree = vl_kdtreebuild(single(d));
     goldenSiftResults(i,:) = {country, location, value, thresh, f, single(d), kdTree};
-    %memory
 end
 
 save('goldenSiftResults.mat', 'goldenSiftResults');

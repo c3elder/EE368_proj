@@ -1,25 +1,33 @@
 function outputStruct = matchImages(inputImagePath)
 
-% load('Bill Images/goldenSiftResults.mat'); NOTE: Loaded below
+debug = false;
 
 rawImage = im2double(imread(inputImagePath));
 
 % **********************BEGIN SEGMENTATION*********************************
-fprintf('Segmenting...\n')
+if debug 
+    fprintf('Segmenting...\n')
+end
 % Downsample
 downsize = 1/4;
 img_ds = imresize(rawImage,downsize);
 
-% figure(1);imshow(img)
-% clear img
-% figure(2);
-% subplot(2,2,1);imshow(img_ds)
+if debug
+    figure(1);
+    imshow(img)
+    clear img
+    figure(2);
+    subplot(2,2,1);
+    imshow(img_ds)
+end
 
 % Convert to HSV
 img_ds_hsv = rgb2hsv(img_ds);
-% subplot(2,2,2);imshow(img_ds_hsv(:,:,1))
-% subplot(2,2,3);imshow(img_ds_hsv(:,:,2))
-% subplot(2,2,4);imshow(img_ds_hsv(:,:,3))
+if debug
+    subplot(2,2,2);imshow(img_ds_hsv(:,:,1))
+    subplot(2,2,3);imshow(img_ds_hsv(:,:,2))
+    subplot(2,2,4);imshow(img_ds_hsv(:,:,3))
+end
 
 % Threshold
 thresh_global = graythresh(img_ds);
@@ -33,11 +41,13 @@ img_h_bw = im2bw(img_ds_hsv(:,:,1),thresh_h);
 img_s_bw = im2bw(img_ds_hsv(:,:,2),thresh_s);
 img_v_bw = im2bw(img_ds_hsv(:,:,3),thresh_v);
 
-% figure(3);
-% subplot(2,2,1);imshow(img_ds_bw)
-% subplot(2,2,2);imshow(img_h_bw)
-% subplot(2,2,3);imshow(img_s_bw)
-% subplot(2,2,4);imshow(img_v_bw)
+if debug
+    figure(3);
+    subplot(2,2,1);imshow(img_ds_bw)
+    subplot(2,2,2);imshow(img_h_bw)
+    subplot(2,2,3);imshow(img_s_bw)
+    subplot(2,2,4);imshow(img_v_bw)
+end
 
 % Apply LoG Operator
 img_ds_log = edge(img_ds_bw,'log');
@@ -45,11 +55,13 @@ img_h_log = edge(img_h_bw,'log');
 img_s_log = edge(img_s_bw,'log');
 img_v_log = edge(img_v_bw,'log');
 
-% figure(4);
-% subplot(2,2,1);imshow(img_ds_log)
-% subplot(2,2,2);imshow(img_h_log)
-% subplot(2,2,3);imshow(img_s_log)
-% subplot(2,2,4);imshow(img_v_log)
+if debug
+    figure(4);
+    subplot(2,2,1);imshow(img_ds_log)
+    subplot(2,2,2);imshow(img_h_log)
+    subplot(2,2,3);imshow(img_s_log)
+    subplot(2,2,4);imshow(img_v_log)
+end
 
 % Dilate
 box = ones(7,7);
@@ -58,11 +70,13 @@ img_h_dil = imdilate(img_h_log,box);
 img_s_dil = imdilate(img_s_log,box);
 img_v_dil = imdilate(img_v_log,box);
 
-% figure(5);
-% subplot(2,2,1);imshow(img_ds_dil)
-% subplot(2,2,2);imshow(img_h_dil)
-% subplot(2,2,3);imshow(img_s_dil)
-% subplot(2,2,4);imshow(img_v_dil)
+if debug
+    figure(5);
+    subplot(2,2,1);imshow(img_ds_dil)
+    subplot(2,2,2);imshow(img_h_dil)
+    subplot(2,2,3);imshow(img_s_dil)
+    subplot(2,2,4);imshow(img_v_dil)
+end
 
 % Fill Holes
 img_ds_fill = imfill(img_ds_dil,'holes');
@@ -70,11 +84,13 @@ img_h_fill = imfill(img_h_dil,'holes');
 img_s_fill = imfill(img_s_dil,'holes');
 img_v_fill = imfill(img_v_dil,'holes');
 
-% figure(6)
-% subplot(2,2,1);imshow(img_ds_fill)
-% subplot(2,2,2);imshow(img_h_fill)
-% subplot(2,2,3);imshow(img_s_fill)
-% subplot(2,2,4);imshow(img_v_fill)
+if debug
+    figure(6)
+    subplot(2,2,1);imshow(img_ds_fill)
+    subplot(2,2,2);imshow(img_h_fill)
+    subplot(2,2,3);imshow(img_s_fill)
+    subplot(2,2,4);imshow(img_v_fill)
+end
 
 % Label Regions
 img_v_label = bwlabel(img_v_fill,8);
@@ -126,14 +142,20 @@ for nRegion = 1:length(imgProps)
     end
 end % nRegion
 
-% figure(7); imshow(img_v_final)
-% figure(8); imshow(rgb2gray(img_ds).*img_v_final)
-% figure(9); imshow(img_h_final)
-% figure(10);imshow(rgb2gray(img_ds).*img_h_final)
+if debug
+    figure(7); imshow(img_v_final)
+    figure(8); imshow(rgb2gray(img_ds).*img_v_final)
+    figure(9); imshow(img_h_final)
+    figure(10);imshow(rgb2gray(img_ds).*img_h_final)
+end
 
 % Combine Filters
 img_hv_all = ((img_h_final + img_v_final) > 0);
-figure(11);imshow(img_hv_all)
+
+if debug
+    figure(11);
+    imshow(img_hv_all)
+end
 
 % Separate the Bills
 img_hv_label = bwlabel(img_hv_all,8);
@@ -147,8 +169,12 @@ for nRegion = 1:length(imgProps)
     box = imgProps(nRegion).BoundingBox;
 %     disp([box(3), box(4), size(convHull)])
     
+    box = [floor(box(1:2)), ceil(box(3:4))];
     img_hv_final(box(2):box(2)+box(4)-1,box(1):box(1)+box(3)-1,nRegion) = convHull;
-    figure(11+nRegion);imshow(img_hv_final(:,:,nRegion))
+    if debug
+        figure(11+nRegion);
+        imshow(img_hv_final(:,:,nRegion))
+    end
 %    img_hv_final(:,:,nRegion) = imgProps(nRegion).ConvexImage;
     % Black out blob nRegion in all but the nRegion-th image
 %     for i = 1:length(imgProps)
@@ -161,12 +187,14 @@ for nRegion = 1:length(imgProps)
 end
 
 % ****************END OF SEGMENTATION**************************************
-fprintf('End Segmentation, Start SIFTing...\n')
+if debug
+    fprintf('End Segmentation, Start SIFTing...\n')
+end
 
 % **********************START SIFTING**************************************
 % sample = rgb2gray(rawImage);
 
-clearvars -except rawImage img_hv_final downsize
+clearvars -except rawImage img_hv_final downsize debug
 load('Bill Images/goldenSiftResults.mat');
 num_bills = size(img_hv_final,3);
 outputStruct = struct();  
@@ -176,12 +204,21 @@ outputStruct.Features = cell(1,num_bills);
 
 % SIFT each bill individually
 for bill = 1:size(img_hv_final,3)
-    disp(sprintf('SIFTING Bill# %d',bill))
+    if debug
+        disp(sprintf('SIFTING Bill# %d',bill));
+    end
     sample  = rgb2gray(rawImage.* ...
               repmat(imresize(img_hv_final(:,:,bill),1/downsize,'nearest'),[1,1,3]));
-    figure(bill+11);imshow(sample);title(sprintf('Bill#: %d',bill))
+    sample = uint8(sample*255);
+    imwrite(sample, ['output_' num2str(bill) '.jpg'], 'jpg');
     
-    [Fsamp,Dsamp] = vl_sift(single(sample), 'PeakThresh', 0.05);
+    if debug
+         figure(bill+11);
+         imshow(sample);
+         title(sprintf('Bill#: %d',bill))
+    end
+    
+    [Fsamp,Dsamp] = vl_sift(single(sample), 'PeakThresh', 10);
     Dsamp = single(Dsamp);
 %     disp(Dsamp)
     
@@ -208,5 +245,6 @@ for bill = 1:size(img_hv_final,3)
     outputStruct.Country{bill} = goldenSiftResults{ind, 1};
     outputStruct.ImgLoc{bill} = goldenSiftResults{ind, 2};
     outputStruct.Features{bill} = Dsamp;
+    outputStruct.matchSum{bill} = matchSum;
     
 end

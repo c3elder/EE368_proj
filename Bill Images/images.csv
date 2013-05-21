@@ -1,6 +1,6 @@
 Country, Image Location, $ Value, SIFT Threshold (-1 default)
 EU, ten_front.jpg, 10, 10
-EU, ten_back_italy.jpg, 10, 10
+EU, ten_back.jpg, 10, 10
 US, five_back.jpg, 5, -1
 US, five_front.jpg, 5, -1
 US, one_back.jpg, 1, -1
@@ -9,5 +9,9 @@ Eritrea, one_back.jpg, 1, -1
 Eritrea, one_front.jpg, 1, -1
 India, ten_front.jpg, 10, 10
 India, ten_back.jpg, 10, 10
-India, twenty_front.jpg, 20, 5
-India, twenty_back.jpg, 20, 5
+India, twenty_back.jpg, 20, 10
+India, twenty_front.jpg, 20, 10
+Turkey, twenty_back.jpg, 20, 3
+Turkey, twenty_front.jpg, 20, 5
+Bangladesh, ten_front.jpg, 10, 10
+Bangladesh, ten_back.jpg, 10, 5

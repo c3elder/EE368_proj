@@ -35,4 +35,5 @@ for i=2:rows
     
     fprintf('Test %d had result %d with %d features \n', i-1, all(resultsToCompare), numel(outputStruct.Features)/128);
     outputStructArray{end+1} = outputStruct;
+    close all;
 end
