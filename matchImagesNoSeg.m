@@ -1,13 +1,13 @@
 function outputStruct = matchImagesNoSeg(inputImagePath)
 
 % SETUP VARS
-debug = true;
-terminalOutput = true;
+debug = false;
+terminalOutput = false;
 numRepeats = 3;
 useGCC = true;
 maxFeatures = 500;
-numHomoIterations = 100;
-showUI = true;
+numRansacIterations = 100;
+showUI = false;
 
 % ALGORITHM START
 load('Bill Images/goldenSiftResults.mat');
@@ -43,8 +43,9 @@ Dsamp = single(Dsamp);
 
 [goldenRows, goldenCols] = size(goldenSiftResults);
 matchSum = zeros(goldenRows,1);
+matchSumOrig = zeros(goldenRows,1);
 Hs = cell(goldenRows,1);
-matchesCell = cell(goldenRows, 1);
+
 for j = 1:goldenRows;
     
     clear H score ok ;
@@ -56,6 +57,7 @@ for j = 1:goldenRows;
     
     %sanity check: are there any matches? sometimes not.
     matchSum(j) = 0;
+    matchSumOrig(j) = 0;
     if ~isempty(matches)
         
         %for some unknown reason, tons of features end up mapping to the same
@@ -77,17 +79,18 @@ for j = 1:goldenRows;
         %it's not
         
         if ~isempty(matches)
-            matchSum(j) = sum(clearSelector);
+            numMatches = size(matches,2) ;
+            matchSum(j) = numMatches;
+            matchSumOrig(j) = numMatches;
             %GCC check
             if useGCC
-                numMatches = size(matches,2) ;
                 X1 = Fsamp(1:2,matches(1,:)) ; X1(3,:) = 1 ;
                 X2 = Fgolden(1:2,matches(2,:)) ; X2(3,:) = 1 ;
                 
-                score = zeros(numHomoIterations,1);
-                ok = cell(numHomoIterations,1);
-                H = cell(numHomoIterations,1);
-                for t = 1:numHomoIterations
+                score = zeros(numRansacIterations,1);
+                ok = cell(numRansacIterations,1);
+                H = cell(numRansacIterations,1);
+                for t = 1:numRansacIterations
                     % estimate homograpyh
                     subset = vl_colsubset(1:numMatches, 4) ;
                     A = [] ;
@@ -116,6 +119,7 @@ for j = 1:goldenRows;
                 
                 Hs{j} = H;
                 ok = ok{best} ;
+                
                 matchSum(j) = sum(ok);
             end
         end
@@ -197,5 +201,6 @@ outputStruct.Country = { goldenSiftResults{ind, 1} };
 outputStruct.ImgLoc = { goldenSiftResults{ind, 2} };
 outputStruct.Features = { Dsamp };
 outputStruct.matchSum = { matchSum };
+outputStruct.matchSumOrig = { matchSumOrig };
 
 end

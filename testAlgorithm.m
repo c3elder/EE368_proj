@@ -33,7 +33,7 @@ for i=2:rows
         resultsToCompare = tmp | resultsToCompare; 
     end
     
-    fprintf('Test %d had result %d with %d features \n', i-1, all(resultsToCompare), numel(outputStruct.Features)/128);
+    fprintf('Test %d had result %d with %d orig matches and %d processed matches \n', i-1, outputStruct.matchSumOrig{1}, outputStruct.matchSum{1});
     outputStructArray{end+1} = outputStruct;
     close all;
 end

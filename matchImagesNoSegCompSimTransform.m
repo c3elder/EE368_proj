@@ -43,10 +43,7 @@ Dsamp = single(Dsamp);
 [goldenRows, goldenCols] = size(goldenSiftResults);
 matchSum = zeros(goldenRows,1);
 Hs = cell(goldenRows,1);
-matchesCell = cell(goldenRows, 1);
 for j = 1:goldenRows;
-    
-    clear H score ok ;
     
     Fgolden = goldenSiftResults{j, 5};
     Dgolden = goldenSiftResults{j, 6};
@@ -110,7 +107,7 @@ for j = 1:goldenRows;
                     
                 end
                 
-                [score, best] = max(score) ;
+                [val, best] = max(score) ;
                 H = H{best} ;
                 
                 Hs{j} = H;
