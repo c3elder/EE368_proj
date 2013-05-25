@@ -13,7 +13,7 @@ end
 goldenSiftResults=cell(rows-1,9);
 
 % USE DEFAULT THRESHOLD OF
-defaultThresh = 0.5;
+thresh = 0.5;
 
 maxFeatures = 500;
 
@@ -21,10 +21,8 @@ for i=1:rows-1
     country = C{i+1,1}
     location = C{i+1,2};
     value = str2double(C{i+1,3});
-    thresh = str2double(C{i+1,4});
-    %if thresh==-1
-        thresh = defaultThresh;
-    %end
+    unitValue = str2double(C{i+1,4});
+    
     imInUse = imread([country, folderSlash, location]);
     [imR, imC, N] = size(imInUse);
     [f, d] = vl_sift(single(rgb2gray(imInUse)), 'PeakThresh', thresh);
@@ -35,7 +33,7 @@ for i=1:rows-1
     d = d(:, sortedInd(1:maxFeatures));
     
     kdTree = vl_kdtreebuild(single(d));
-    goldenSiftResults(i,:) = {country, location, value, thresh, f, single(d), kdTree, imR, imC};
+    goldenSiftResults(i,:) = {country, location, value, thresh, f, single(d), unitValue, imR, imC};
 end
 
 save('goldenSiftResults.mat', 'goldenSiftResults');

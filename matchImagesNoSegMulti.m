@@ -235,8 +235,10 @@ if showUI
         Cy = round(Cy/4);
         plot(Cx, Cy, 'xr')
         
-        createText(Cx,Cy,[goldenSiftResults{ind, 1}], textSize);
-        createText(Cx,Cy+textSize+textBorder,[num2str(goldenSiftResults{ind, 3})], textSize);
+        nativeBillVal = goldenSiftResults{ind, 3};
+        USDBillVal = nativeBillVal*goldenSiftResults{ind, 7};
+        createText(Cx,Cy,[goldenSiftResults{ind, 1} ' ' num2str(nativeBillVal)], textSize);
+        createText(Cx,Cy+textSize+textBorder,sprintf('$%.2f', USDBillVal), textSize);
         
     end
 
