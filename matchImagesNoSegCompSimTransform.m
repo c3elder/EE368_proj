@@ -1,12 +1,11 @@
-function outputStruct = matchImagesNoSeg(inputImagePath)
+function outputStruct = matchImagesNoSegCompSimTransform(inputImagePath)
 
 % SETUP VARS
-debug = true;
-terminalOutput = true;
+debug = false;
+terminalOutput = false;
 numRepeats = 3;
 useGCC = true;
 maxFeatures = 500;
-numHomoIterations = 100;
 showUI = true;
 
 % ALGORITHM START
@@ -84,10 +83,10 @@ for j = 1:goldenRows;
                 X1 = Fsamp(1:2,matches(1,:)) ; X1(3,:) = 1 ;
                 X2 = Fgolden(1:2,matches(2,:)) ; X2(3,:) = 1 ;
                 
-                score = zeros(numHomoIterations,1);
-                ok = cell(numHomoIterations,1);
-                H = cell(numHomoIterations,1);
-                for t = 1:numHomoIterations
+                score = zeros(100,1);
+                ok = cell(100,1);
+                H = cell(100,1);
+                for t = 1:400
                     % estimate homograpyh
                     subset = vl_colsubset(1:numMatches, 4) ;
                     A = [] ;
@@ -165,6 +164,58 @@ end
 
 [val, ind] = max(matchSum);
 
+%once we know the right bill, get the best estimate of the edge positions
+%possible
+
+%run gcc again
+Fgolden = goldenSiftResults{ind, 5};
+Dgolden = goldenSiftResults{ind, 6};
+
+[matches, scores]=vl_ubcmatch(Dsamp, Dgolden, 1.5);
+numMatches = size(matches,2) ;
+
+T = cell(400,1);
+C = cell(400,1);
+ok = cell(400,1);
+
+X1all = Fgolden(1:2,matches(2,:));
+X2all = Fsamp(1:2,matches(1,:));
+
+for t = 1:400
+    %estimate similarity transform
+    %optimizations from http://vision.ece.ucsb.edu/~zuliani/Research/RANSAC/docs/RANSAC4Dummies.pdf
+    subset = vl_colsubset(1:numMatches, 2) ;
+    X2 = Fsamp(1:2,matches(1,subset));
+    X1 = Fgolden(1:2,matches(2,subset));
+    
+    MM = X1(:,1) - X1(:,2);
+    detMM = MM(1)*MM(1) + MM(2)*MM(2);
+    MMi = MM/detMM;
+    Delta = X2(:,1) - X2(:,2);
+    
+    theta = zeros(1,4);
+    theta(1) = MMi(1)*Delta(1) + MMi(2)*Delta(2);
+    theta(2) = MMi(1)*Delta(2) - MMi(2)*Delta(1);
+    theta(3) = X2(1,2) - theta(1)*X1(1,2) + theta(2)*X1(2,2);
+    theta(4) = X2(2,2) - theta(1)*X1(2,2) - theta(2)*X1(1,2);
+       
+    T{t} = [theta(1), -theta(2); theta(2), theta(1)];
+    C{t} = [theta(3); theta(4)];
+    
+    %Score the results
+    X2allEst = T{t}*X1all + [C{t}(1)*ones(1, numMatches); C{t}(2)*ones(1, numMatches)];
+    
+    du = X2allEst(1,:) - X2all(1,:);
+    dv = X2allEst(2,:) - X2all(2,:);
+    ok{t} = (du.*du + dv.*dv) < 6*6 ;
+    score(t) = sum(ok{t});    
+end
+
+[val best] = max(score);
+
+T = T{best};
+C = C{best};
+
 if showUI
     %map edges
     imR = goldenSiftResults{ind, 8};
@@ -181,6 +232,14 @@ if showUI
 
     imshow(rawImage)
     hold on
+    
+    for i=1:numel(pa)/2
+        paInUse = pa(:,i);
+        pb = T*paInUse + C;
+        xSample = pb(1);
+        ySample = pb(2);
+        plot(round(xSample),round(ySample),'ok');
+    end
     
     pa = [pa; ones(1, numel(pa)/2)];
     for i=1:numel(pa)/3

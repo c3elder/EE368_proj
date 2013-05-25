@@ -10,7 +10,7 @@ end
 
 [rows, cols] = size(C);
 
-goldenSiftResults=cell(rows-1,7);
+goldenSiftResults=cell(rows-1,9);
 
 % USE DEFAULT THRESHOLD OF
 defaultThresh = 0.5;
@@ -25,8 +25,9 @@ for i=1:rows-1
     %if thresh==-1
         thresh = defaultThresh;
     %end
-    
-    [f, d] = vl_sift(single(rgb2gray(imread([country, folderSlash, location]))), 'PeakThresh', thresh);
+    imInUse = imread([country, folderSlash, location]);
+    [imR, imC, N] = size(imInUse);
+    [f, d] = vl_sift(single(rgb2gray(imInUse)), 'PeakThresh', thresh);
     
     %eliminate features with very small scale
     [sortedList sortedInd ] = sort(f(1,:), 'descend');
@@ -34,7 +35,7 @@ for i=1:rows-1
     d = d(:, sortedInd(1:maxFeatures));
     
     kdTree = vl_kdtreebuild(single(d));
-    goldenSiftResults(i,:) = {country, location, value, thresh, f, single(d), kdTree};
+    goldenSiftResults(i,:) = {country, location, value, thresh, f, single(d), kdTree, imR, imC};
 end
 
 save('goldenSiftResults.mat', 'goldenSiftResults');
