@@ -12,7 +12,7 @@ fclose(fid);
 results = zeros(rows-1, 3);
 
 %test every image against the expected results
-algorithmHandle = @matchImagesNoSeg;
+algorithmHandle = @matchImagesMultiOptimized;
 
 outputStructArray = {};
 
@@ -33,7 +33,9 @@ for i=2:rows
         resultsToCompare = tmp | resultsToCompare; 
     end
     
-    fprintf('Test %d had result %d with %d orig matches and %d processed matches \n', i-1, outputStruct.matchSumOrig{1}, outputStruct.matchSum{1});
+    fprintf('Test %d had result %d with %d orig matches and %d processed matches \n', ...
+            i-1, all(resultsToCompare), ...
+            max(outputStruct.matchSumOrig{1}), max(outputStruct.matchSum{1}));
     outputStructArray{end+1} = outputStruct;
     close all;
 end
