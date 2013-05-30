@@ -1,9 +1,7 @@
 function outputStruct = matchImagesMultiOptimized(inputImagePath, output_img_path)
 
-%run('vlfeat-0.9.16\toolbox\vl_setup');
-
 if nargin < 2
-    output_img_path = 'C:\xampp-portable\htdocs\output\test.jpg';
+    output_img_path = 'C:\xampp\htdocs\output\test.jpg';
 end
 
 tic
@@ -24,7 +22,7 @@ centroidGap = 80;
 debug = false;
 showUI = true;
 droidCamera = true;
-textSize = 30;
+textSize = 40;
 textBorder = 12;
 
 % ALGORITHM START
@@ -121,25 +119,17 @@ while billsToBeFound
         Fgolden = goldenSiftResults{j, 5};
         Dgolden = goldenSiftResults{j, 6};
         
-        matchSum(j) = 0;
-        matchSumOrig(j) = 0;
         matches = matchesArrayOrig{j}; %extract from earlier run
         
-        %there is again another chance for matches to be empty, make sure it's not
-        if ~isempty(matches)
-            numMatches = size(matches,2) ;
-            matchSum(j) = numMatches;
-            matchSumOrig(j) = numMatches;
-        end
+        numMatches = size(matches,2) ;
+        matchSum(j) = numMatches;
+        matchSumOrig(j) = numMatches;
         
-        %matches = matchesArrayOrig{j};
         if ~isempty(matches) && numMatches > GCCNumRandFeatures
-            numMatches = size(matches,2) ;
             
             %GCC check
             X1 = Fgolden(1:2,matches(2,:)) ; X1(3,:) = 1 ;
             X2 = Fsamp(1:2,matches(1,:)) ; X2(3,:) = 1 ;
-            
             
             score = zeros(numRansacIterations,1);
             ok = cell(numRansacIterations,1);
@@ -191,12 +181,13 @@ while billsToBeFound
                     Cx = round(mean(xSample));
                     Cy = round(mean(ySample));
                     if any( (abs(centroids(1,:)-Cx)<centroidGap) & (abs(centroids(2,:)-Cy)<centroidGap) )
-                      % fprintf('centroid in close proximity to another\n');
+                      if debug
+                          fprintf('centroid in close proximity to another\n');
+                      end
                       score(t) = 0;
                     end
                 end
-                
-                
+         
             end
             
             [valScores, best] = max(score) ;
@@ -300,8 +291,8 @@ while billsToBeFound
         end
         matchSumRatio = max(matchSumOrigNext)/max(matchSumOrig);
         if  matchSumRatio < earlyTermThresh
-        %the next round will have a matchSumOrig = a if a/this round's
-        %matchSumOrig < thresh use early termination
+            %the next round will have a matchSumOrig = a if a/this round's
+            %matchSumOrig < thresh use early termination
             billsToBeFound = false;
             fprintf(' - matchSumRatio %0.2f (next: %d, current: %d) - Early Termination\n', ...
                     matchSumRatio, max(matchSumOrigNext), max(matchSumOrig))
@@ -318,20 +309,20 @@ end
 
 toc
 
-%match the corners
 if showUI
     figure
     imshow(rawImage)
     hold on
     
     grandTotal = 0;
+    cmap = hsv(length(outputStruct.goldenIndex));
     for j = 1:length(outputStruct.goldenIndex)
         ind = outputStruct.goldenIndex(j);
         
         Cx = outputStruct.centroid(1,j);
         Cy = outputStruct.centroid(2,j);
         border = outputStruct.border{j};
-        plot(round(border(1,:)),round(border(2,:)),'*k');
+        plot(round(border(1,:)),round(border(2,:)),'s', 'Color', cmap(j,:), 'MarkerFaceColor', cmap(j,:));
         plot(Cx, Cy, 'xr')
         
         nativeBillVal = goldenSiftResults{ind, 3};
@@ -351,11 +342,11 @@ if showUI
             Cy = subSampImgR - textEdgeBarrier;
         end
         
-        createText(Cx,Cy,[goldenSiftResults{ind, 1} ' ' num2str(nativeBillVal)], textSize-5, 'center');
-        createText(Cx,Cy+textSize+textBorder,sprintf('$%.2f', USDBillVal), textSize, 'center');
+        createText(Cx,Cy,[goldenSiftResults{ind, 1} ' ' num2str(nativeBillVal)], textSize-5, 'center', cmap(j,:));
+        createText(Cx,Cy+textSize+textBorder,sprintf('$%.2f', USDBillVal), textSize, 'center', cmap(j,:));
         grandTotal = grandTotal + USDBillVal;
     end
-    createText(50,50,sprintf('Total $%.2f', grandTotal), textSize-5, 'left');
+    createText(50,50,sprintf('Total $%.2f', grandTotal), textSize+5, 'left', 'y');
     
     f = getframe(gca);
     im = frame2im(f);
@@ -365,14 +356,15 @@ end
 
 end
 
-function createText(Cx,Cy, inpString, textSize, alignTo)
-text(Cx+1,Cy+1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
-text(Cx-1,Cy-1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
-text(Cx+1,Cy-1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
-text(Cx-1,Cy+1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
-text(Cx,Cy,inpString, 'HorizontalAlignment', alignTo, 'FontSize', textSize, 'Color', 'y')
+function createText(Cx,Cy, inpString, textSize, alignTo, color)
+    text(Cx+1,Cy+1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
+    text(Cx-1,Cy-1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
+    text(Cx+1,Cy-1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
+    text(Cx-1,Cy+1,inpString, 'HorizontalAlignment',alignTo, 'FontSize', textSize, 'Color', [0 0 0])
+    text(Cx,Cy,inpString, 'HorizontalAlignment', alignTo, 'FontSize', textSize, 'Color', color)
 end
 
+%not used, but keeping incase of c implementation
 function [estX1, estX2] = homographEstimation(th, x1, x2)
     bot = th(3)*x1 + th(6)*x2 + th(9);
     estX1 = (th(1)*x1 + th(4)*x2 + th(7))/bot;
